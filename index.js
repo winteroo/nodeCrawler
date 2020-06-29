@@ -1,8 +1,8 @@
-const request = require('request');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const axios = require('axios');
 
 let url = 'https://winteroo.github.io/myblog/Front/JS/001positionOperation.html';
 
@@ -14,18 +14,26 @@ class Crawler {
   }
   start() {
     this.init(this.url);
+    // 清空文件内容
+    fs.writeFileSync('blogConfig.txt','');
   }
-  init(url) {
-    https.get(url, (res) => {
-      let html = '';
-      res.setEncoding('utf-8');
-      res.on('data', chunk => {
-        html += chunk;
-      })
-      res.on('end', () => {
-        this.getNext(html);
-      })
-    });
+  async init(url) {
+    try {
+      let res = await axios.get(url);
+      this.getNext(res.data);
+    } catch(err){
+      console.log('请求出错。');
+    }
+    // https.get(url, (res) => {
+    //   let html = '';
+    //   res.setEncoding('utf-8');
+    //   res.on('data', chunk => {
+    //     html += chunk;
+    //   })
+    //   res.on('end', () => {
+    //     this.getNext(html);
+    //   })
+    // });
   }
   getNext(html) {
     let $ = cheerio.load(html);
